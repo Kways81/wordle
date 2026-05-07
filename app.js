@@ -192,9 +192,9 @@ function showToast(msg) {
 
 // ── Stats ──
 function loadStats() {
-  const key = `wordle_stats_${settings.wordLength}`;
+  const len = (settings && settings.wordLength) || 5;
   try {
-    return JSON.parse(localStorage.getItem(key)) || defaultStats();
+    return JSON.parse(localStorage.getItem(`wordle_stats_${len}`)) || defaultStats();
   } catch { return defaultStats(); }
 }
 
@@ -205,7 +205,7 @@ function defaultStats() {
 // ── Settings ──
 function loadSettings() {
   try {
-    return { ...defaultSettings(), ...JSON.parse(localStorage.getItem('wordle_settings')) };
+    return { ...defaultSettings(), ...(JSON.parse(localStorage.getItem('wordle_settings')) || {}) };
   } catch { return defaultSettings(); }
 }
 
