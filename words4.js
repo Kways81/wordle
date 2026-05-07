@@ -33,7 +33,7 @@ const WORDS4 = [
   "menu","mere","mesh","mile","milk","mill","mind","mine","miss","mode",
   "more","most","move","much","myth","name","navy","near","neck","need",
   "next","nice","nine","node","none","norm","nose","note","noun","obey",
-  "odds","once","only","open","oral","over","oven","owns","pace","pack",
+  "odds","once","only","open","oral","oven","over","owns","pace","pack",
   "page","paid","pain","palm","park","part","pass","path","pave","peak",
   "peel","peer","pick","pier","pile","pill","pine","pink","pipe","plan",
   "play","plot","plow","plug","plus","poem","poet","poll","pond","pool",
