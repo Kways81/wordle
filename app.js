@@ -230,6 +230,10 @@ function saveSettings() {
   localStorage.setItem('wordle_settings', JSON.stringify(settings));
 }
 
+function applyColourBlind() {
+  document.body.classList.toggle('cb', settings.colourBlind);
+}
+
 function saveStats() {
   localStorage.setItem(`wordle_stats_${settings.wordLength}`, JSON.stringify(stats));
 }
@@ -401,6 +405,7 @@ document.getElementById('play-again-btn').addEventListener('click', startNewGame
 
 // ── Boot ──
 buildBoard();
+applyColourBlind();
 const restored = restoreGame();
 if (!restored) {
   targetWord = pickRandomWord();

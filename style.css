@@ -15,6 +15,11 @@
   --modal-bg: #1a1a1b;
 }
 
+body.cb {
+  --green:  #f5793a;
+  --yellow: #85c0f9;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
