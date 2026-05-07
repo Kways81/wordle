@@ -346,9 +346,17 @@ function pickRandomWord() {
   return list[Math.floor(Math.random() * list.length)];
 }
 
+function getDailyWord() {
+  const epoch = new Date('2026-01-01T00:00:00Z');
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const dayIndex = Math.floor((today - epoch) / 86400000);
+  return WORDS[((dayIndex % WORDS.length) + WORDS.length) % WORDS.length];
+}
+
 function startNewGame() {
   stats = loadStats();
-  targetWord = pickRandomWord();
+  targetWord = settings.dailyChallenge ? getDailyWord() : pickRandomWord();
   currentRow = 0;
   currentCol = 0;
   currentGuess = [];
@@ -408,6 +416,6 @@ buildBoard();
 applyColourBlind();
 const restored = restoreGame();
 if (!restored) {
-  targetWord = pickRandomWord();
+  targetWord = settings.dailyChallenge ? getDailyWord() : pickRandomWord();
   saveGameState(targetWord, [], 'playing');
 }
