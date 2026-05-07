@@ -15,13 +15,15 @@ const WIN_MESSAGES = ['Genius!', 'Magnificent!', 'Impressive!', 'Splendid!', 'Gr
 
 // ── Board init ──
 function buildBoard() {
+  const len = settings.wordLength;
   const board = document.getElementById('board');
   board.innerHTML = '';
+  board.dataset.length = len;
   for (let r = 0; r < 6; r++) {
     const row = document.createElement('div');
     row.classList.add('row');
     row.id = `row-${r}`;
-    for (let c = 0; c < 5; c++) {
+    for (let c = 0; c < len; c++) {
       const tile = document.createElement('div');
       tile.classList.add('tile');
       tile.id = `tile-${r}-${c}`;
@@ -40,7 +42,7 @@ function markActiveRow() {
 
 // ── Letter input ──
 function addLetter(letter) {
-  if (gameOver || currentCol >= 5) return;
+  if (gameOver || currentCol >= settings.wordLength) return;
   const tile = document.getElementById(`tile-${currentRow}-${currentCol}`);
   tile.textContent = letter.toUpperCase();
   tile.dataset.letter = letter.toLowerCase();
@@ -61,23 +63,34 @@ function deleteLetter() {
 
 function submitGuess() {
   if (gameOver) return;
-  if (currentGuess.length < 5) { shake(); showToast('Not enough letters'); return; }
+  const len = settings.wordLength;
+  const wordList = WORD_LISTS[len];
+  if (currentGuess.length < len) { shake(); showToast('Not enough letters'); return; }
   const word = currentGuess.join('');
-  if (!WORDS.includes(word)) { shake(); showToast('Not in word list'); return; }
+  if (!wordList.includes(word)) { shake(); showToast('Not in word list'); return; }
+
+  if (settings.hardMode) {
+    const hardError = checkHardMode(word);
+    if (hardError) { shake(); showToast(hardError); return; }
+  }
 
   const result = evaluate(word, targetWord);
   revealRow(result, word);
 }
 
+function checkHardMode(word) {
+  return null; // stub — full implementation in Task 6
+}
+
 // ── Evaluation ──
 function evaluate(guess, target) {
-  const result = Array(5).fill('absent');
+  const result = Array(target.length).fill('absent');
   const targetArr = target.split('');
   const guessArr  = guess.split('');
-  const used = Array(5).fill(false);
+  const used = Array(target.length).fill(false);
 
   // Pass 1: correct positions
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < target.length; i++) {
     if (guessArr[i] === targetArr[i]) {
       result[i] = 'correct';
       used[i] = true;
@@ -86,9 +99,9 @@ function evaluate(guess, target) {
   }
 
   // Pass 2: present but wrong position
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < target.length; i++) {
     if (result[i] === 'correct') continue;
-    for (let j = 0; j < 5; j++) {
+    for (let j = 0; j < target.length; j++) {
       if (!used[j] && guessArr[i] === targetArr[j]) {
         result[i] = 'present';
         used[j] = true;
@@ -156,7 +169,7 @@ const keyState = {};
 
 function updateKeyboard(word, result) {
   const priority = { correct: 3, present: 2, absent: 1 };
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < word.length; i++) {
     const letter = word[i];
     const state  = result[i];
     if (!keyState[letter] || priority[state] > priority[keyState[letter]]) {
@@ -250,6 +263,7 @@ function saveGameState(word, guesses, status) {
 function restoreGame() {
   const state = loadGameState();
   if (!state.word || state.status === 'won' || state.status === 'lost') return false;
+  if (state.word.length !== settings.wordLength) return false;
 
   targetWord = state.word;
   const guesses = state.guesses || [];
@@ -323,8 +337,14 @@ function closeModal(id) {
 }
 
 // ── New game ──
+function pickRandomWord() {
+  const list = WORD_LISTS[settings.wordLength];
+  return list[Math.floor(Math.random() * list.length)];
+}
+
 function startNewGame() {
-  targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+  stats = loadStats();
+  targetWord = pickRandomWord();
   currentRow = 0;
   currentCol = 0;
   currentGuess = [];
@@ -383,6 +403,6 @@ document.getElementById('play-again-btn').addEventListener('click', startNewGame
 buildBoard();
 const restored = restoreGame();
 if (!restored) {
-  targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+  targetWord = pickRandomWord();
   saveGameState(targetWord, [], 'playing');
 }
