@@ -338,7 +338,7 @@ function closeModal(id) {
 
 // ── New game ──
 function pickRandomWord() {
-  const list = WORD_LISTS[settings.wordLength];
+  const list = WORD_LISTS[settings.wordLength] || WORD_LISTS[5];
   return list[Math.floor(Math.random() * list.length)];
 }
 

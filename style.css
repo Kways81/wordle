@@ -433,10 +433,6 @@ main {
 
 /* ── Responsive ── */
 @media (max-width: 380px) {
-  #board {
-    grid-template-rows: repeat(6, 52px);
-    grid-template-columns: repeat(5, 52px);
-  }
   .tile { width: 52px; height: 52px; font-size: 1.6rem; }
   .key  { min-width: 32px; height: 50px; font-size: 0.72rem; }
   .key-wide { min-width: 50px; }
