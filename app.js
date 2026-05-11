@@ -255,6 +255,21 @@ function applyColourBlind() {
   document.body.classList.toggle('cb', settings.colourBlind);
 }
 
+function applySettings() {
+  applyColourBlind();
+  document.getElementById('hard-mode-toggle').checked    = settings.hardMode;
+  document.getElementById('colour-blind-toggle').checked = settings.colourBlind;
+  document.getElementById('daily-toggle').checked        = settings.dailyChallenge;
+
+  document.querySelectorAll('.seg-btn').forEach(btn => {
+    btn.classList.toggle('active', Number(btn.dataset.len) === settings.wordLength);
+  });
+
+  const lengthControl = document.getElementById('length-control');
+  lengthControl.style.opacity      = settings.dailyChallenge ? '0.4' : '1';
+  lengthControl.style.pointerEvents = settings.dailyChallenge ? 'none' : '';
+}
+
 function saveStats() {
   localStorage.setItem(`wordle_stats_${settings.wordLength}`, JSON.stringify(stats));
 }
@@ -441,9 +456,64 @@ document.getElementById('share-btn').addEventListener('click', () => {
 // Play again
 document.getElementById('play-again-btn').addEventListener('click', startNewGame);
 
+// Settings button
+document.getElementById('settings-btn').addEventListener('click', () => {
+  applySettings();
+  openModal('settings-modal');
+});
+
+// Hard mode toggle
+document.getElementById('hard-mode-toggle').addEventListener('change', e => {
+  settings.hardMode = e.target.checked;
+  saveSettings();
+  // Rebuild constraints from played rows if turning hard mode on mid-game
+  hardConstraints = { greens: {}, yellows: [] };
+  if (settings.hardMode && gameState.guesses) {
+    gameState.guesses.forEach(guess => {
+      const result = evaluate(guess, targetWord);
+      result.forEach((r, i) => {
+        if (r === 'correct') hardConstraints.greens[i] = guess[i];
+        if (r === 'present' && !hardConstraints.yellows.includes(guess[i])) {
+          hardConstraints.yellows.push(guess[i]);
+        }
+      });
+    });
+  }
+});
+
+// Colour blind toggle
+document.getElementById('colour-blind-toggle').addEventListener('change', e => {
+  settings.colourBlind = e.target.checked;
+  saveSettings();
+  applyColourBlind();
+});
+
+// Daily challenge toggle
+document.getElementById('daily-toggle').addEventListener('change', e => {
+  settings.dailyChallenge = e.target.checked;
+  if (settings.dailyChallenge) settings.wordLength = 5;
+  saveSettings();
+  applySettings();
+  stats = loadStats();
+  startNewGame();
+});
+
+// Word length segmented control
+document.querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const len = Number(btn.dataset.len);
+    if (len === settings.wordLength) return;
+    settings.wordLength = len;
+    saveSettings();
+    applySettings();
+    stats = loadStats();
+    startNewGame();
+  });
+});
+
 // ── Boot ──
 buildBoard();
-applyColourBlind();
+applySettings();
 const restored = restoreGame();
 if (!restored) {
   targetWord = settings.dailyChallenge ? getDailyWord() : pickRandomWord();

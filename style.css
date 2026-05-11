@@ -445,3 +445,88 @@ main {
   #board[data-length="5"] .tile { width: 52px; height: 52px; }
   #board[data-length="6"] .tile { width: 42px; height: 42px; font-size: 1.3rem; }
 }
+
+/* ── Settings modal ── */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--header-border);
+  gap: 16px;
+}
+
+.setting-row:last-child { border-bottom: none; }
+
+.setting-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.9rem;
+}
+
+.setting-desc {
+  font-size: 0.72rem;
+  color: #818384;
+}
+
+/* Toggle switch */
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle input { opacity: 0; width: 0; height: 0; }
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--gray);
+  border-radius: 24px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.toggle input:checked + .toggle-slider { background: var(--green); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+/* Segmented control */
+.seg-control {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.seg-btn {
+  width: 36px;
+  height: 32px;
+  background: var(--gray);
+  color: var(--text);
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.seg-btn.active { background: var(--green); }
+
+/* Header right — two icon buttons */
+.header-right { justify-content: flex-end; gap: 4px; width: 80px; }
