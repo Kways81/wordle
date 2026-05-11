@@ -467,7 +467,7 @@ document.getElementById('hard-mode-toggle').addEventListener('change', e => {
   settings.hardMode = e.target.checked;
   saveSettings();
   // Rebuild constraints from played rows if turning hard mode on mid-game
-  hardConstraints = { greens: {}, yellows: [] };
+  hardConstraints = { greens: {}, yellows: [] }; // always reset; rebuild below if re-enabling mid-game
   if (settings.hardMode && gameState.guesses) {
     gameState.guesses.forEach(guess => {
       const result = evaluate(guess, targetWord);
