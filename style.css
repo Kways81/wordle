@@ -46,10 +46,10 @@ header {
 .header-left, .header-right {
   display: flex;
   align-items: center;
-  width: 48px;
 }
 
-.header-right { justify-content: flex-end; }
+.header-left  { width: 48px; }
+.header-right { justify-content: flex-end; gap: 4px; width: 80px; }
 
 .header-center h1 {
   font-size: 1.5rem;
@@ -527,6 +527,3 @@ main {
 }
 
 .seg-btn.active { background: var(--green); }
-
-/* Header right — two icon buttons */
-.header-right { justify-content: flex-end; gap: 4px; width: 80px; }
