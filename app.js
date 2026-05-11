@@ -303,6 +303,14 @@ function restoreGame() {
       tile.classList.add(result[i]);
     });
     updateKeyboard(guess, result);
+    if (settings.hardMode) {
+      result.forEach((r, i) => {
+        if (r === 'correct') hardConstraints.greens[i] = guess[i];
+        if (r === 'present' && !hardConstraints.yellows.includes(guess[i])) {
+          hardConstraints.yellows.push(guess[i]);
+        }
+      });
+    }
     currentRow++;
     currentCol = 0;
   });
