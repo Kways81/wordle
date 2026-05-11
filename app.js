@@ -4,6 +4,9 @@ let currentRow = 0;
 let currentCol = 0;
 let currentGuess = [];
 let gameOver = false;
+let hardConstraints = { greens: {}, yellows: [] };
+// greens: { position: letter } — must match exact position
+// yellows: [letter, ...] — must appear somewhere in the guess
 
 const WORD_LISTS = { 4: WORDS4, 5: WORDS, 6: WORDS6 };
 
@@ -79,7 +82,17 @@ function submitGuess() {
 }
 
 function checkHardMode(word) {
-  return null; // stub — full implementation in Task 6
+  for (const [pos, letter] of Object.entries(hardConstraints.greens)) {
+    if (word[pos] !== letter) {
+      return `Position ${Number(pos) + 1} must be ${letter.toUpperCase()}`;
+    }
+  }
+  for (const letter of hardConstraints.yellows) {
+    if (!word.includes(letter)) {
+      return `Guess must contain ${letter.toUpperCase()}`;
+    }
+  }
+  return null;
 }
 
 // ── Evaluation ──
@@ -128,6 +141,14 @@ function revealRow(result, word) {
 
   setTimeout(() => {
     updateKeyboard(word, result);
+    if (settings.hardMode) {
+      result.forEach((r, i) => {
+        if (r === 'correct') hardConstraints.greens[i] = word[i];
+        if (r === 'present' && !hardConstraints.yellows.includes(word[i])) {
+          hardConstraints.yellows.push(word[i]);
+        }
+      });
+    }
     const won = result.every(r => r === 'correct');
     const lost = !won && row === 5;
 
@@ -361,6 +382,7 @@ function startNewGame() {
   currentCol = 0;
   currentGuess = [];
   gameOver = false;
+  hardConstraints = { greens: {}, yellows: [] };
   Object.keys(keyState).forEach(k => delete keyState[k]);
   gameState = {};
   saveGameState(targetWord, [], 'playing');
