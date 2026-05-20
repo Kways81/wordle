@@ -390,6 +390,29 @@ function pickRandomWord() {
   return list[Math.floor(Math.random() * list.length)];
 }
 
+function setLoading(active) {
+  document.getElementById('loading-overlay').classList.toggle('visible', active);
+  document.getElementById('keyboard').style.pointerEvents = active ? 'none' : '';
+}
+
+async function fetchWordFromAPI(length) {
+  const pattern = '?'.repeat(length);
+  const url = `https://api.datamuse.com/words?sp=${pattern}&max=500`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    // Filter to pure alphabetic words of exact length
+    const valid = data
+      .map(entry => entry.word.toLowerCase())
+      .filter(w => /^[a-z]+$/.test(w) && w.length === length);
+    if (!valid.length) throw new Error('No valid words');
+    return valid[Math.floor(Math.random() * valid.length)];
+  } catch {
+    return null; // triggers fallback
+  }
+}
+
 function getDailyWord() {
   const epoch = new Date('2026-01-01T00:00:00Z');
   const today = new Date();
@@ -398,9 +421,10 @@ function getDailyWord() {
   return WORDS[((dayIndex % WORDS.length) + WORDS.length) % WORDS.length];
 }
 
-function startNewGame() {
+async function startNewGame() {
   stats = loadStats();
-  targetWord = settings.dailyChallenge ? getDailyWord() : pickRandomWord();
+
+  // Reset visual state immediately so the board rebuilds right away
   currentRow = 0;
   currentCol = 0;
   currentGuess = [];
@@ -408,11 +432,22 @@ function startNewGame() {
   hardConstraints = { greens: {}, yellows: [] };
   Object.keys(keyState).forEach(k => delete keyState[k]);
   gameState = {};
-  saveGameState(targetWord, [], 'playing');
   buildBoard();
   document.querySelectorAll('.key').forEach(k => k.classList.remove('correct','present','absent'));
   document.getElementById('end-game-actions').style.display = 'none';
   closeModal('stats-modal');
+
+  if (settings.dailyChallenge) {
+    targetWord = getDailyWord();
+  } else {
+    // Try API first, fall back to local list silently
+    setLoading(true);
+    const apiWord = await fetchWordFromAPI(settings.wordLength);
+    setLoading(false);
+    targetWord = apiWord || pickRandomWord();
+  }
+
+  saveGameState(targetWord, [], 'playing');
 }
 
 // ── Input handling ──
@@ -516,6 +551,16 @@ buildBoard();
 applySettings();
 const restored = restoreGame();
 if (!restored) {
-  targetWord = settings.dailyChallenge ? getDailyWord() : pickRandomWord();
-  saveGameState(targetWord, [], 'playing');
+  if (settings.dailyChallenge) {
+    targetWord = getDailyWord();
+    saveGameState(targetWord, [], 'playing');
+  } else {
+    (async () => {
+      setLoading(true);
+      const apiWord = await fetchWordFromAPI(settings.wordLength);
+      setLoading(false);
+      targetWord = apiWord || pickRandomWord();
+      saveGameState(targetWord, [], 'playing');
+    })();
+  }
 }
